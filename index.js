@@ -20,6 +20,7 @@ app.get('/',(req, res)=>{
 
 client.connect(err => {
     const productCollection = client.db("productsdb").collection("products");
+    const ordersCollection = client.db("productsdb").collection("orders");
     app.post('/addProduct', (req, res)=>{
       const product = req.body
       productCollection.insertOne(product)
@@ -29,6 +30,29 @@ client.connect(err => {
 
     })
 
+    app.post('/orderInfo', (req, res)=>{
+      const info = req.body;
+      ordersCollection.insertOne(info)
+      .then(result =>{
+        console.log(result.insertedCount);
+      })
+    
+    })
+
+    app.get('/getOrderInfo', (req, res)=>{
+      ordersCollection.find({})
+      .toArray((err, docs)=>{
+        res.send(docs)
+      })
+    })
+
+    app.post('/deleteOrderInfo/:id', (req, res)=>{
+      ordersCollection.deleteOne({_id:ObjectId(req.params.id)})
+         .then(result => {
+           res.send(result)
+         })
+    })
+
     app.get('/getProduct', (req, res)=>{
       productCollection.find({})
       .toArray((err, docs)=>{
@@ -36,14 +60,14 @@ client.connect(err => {
       })
     })
 
-    app.get('/getOne/:id', (req, res)=>{
-      productCollection.deleteOne({_id:ObjectId(req.params.id)})
-      .then(result =>{
-          res.send(result)
-      })
+    app.get('/getSingleProduct/:id', (req, res)=>{
+      productCollection.find({_id:ObjectId(req.params.id)})
+        .toArray((err, docs)=> {
+          res.send(docs[0])
+        })
     })
 
-    app.get('/deleteProduct', (req, res)=>{
+    app.post('/deleteProduct/:id', (req, res)=>{
       productCollection.deleteOne({_id:ObjectId(req.params.id)})
       .then(result =>{
           res.send(result)
