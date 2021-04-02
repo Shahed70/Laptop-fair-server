@@ -20,6 +20,8 @@ app.get('/',(req, res)=>{
 client.connect(err => {
     const productCollection = client.db("productsdb").collection("products");
     const ordersCollection = client.db("productsdb").collection("orders");
+
+    //Product api
     app.post('/addProduct', (req, res)=>{
       const product = req.body
       productCollection.insertOne(product)
@@ -29,6 +31,31 @@ client.connect(err => {
 
     })
 
+    app.get('/getProduct', (req, res)=>{
+      productCollection.find({})
+      .toArray((err, docs)=>{
+        res.send(docs)
+      })
+    })
+
+    app.get('/getSingleProduct/:id', (req, res)=>{
+      productCollection.find({_id:ObjectId(req.params.id)})
+        .toArray((err, docs)=> {
+          res.send(docs[0])
+        })
+    })
+
+    app.post('/deleteProduct/:id', (req, res)=>{
+      productCollection.deleteOne({_id:ObjectId(req.params.id)})
+      .then(result =>{
+          res.send(result)
+      })
+    })
+
+
+
+
+//Order api
     app.post('/orderInfo', (req, res)=>{
       const info = req.body;
       ordersCollection.insertOne(info)
@@ -52,26 +79,7 @@ client.connect(err => {
          })
     })
 
-    app.get('/getProduct', (req, res)=>{
-      productCollection.find({})
-      .toArray((err, docs)=>{
-        res.send(docs)
-      })
-    })
 
-    app.get('/getSingleProduct/:id', (req, res)=>{
-      productCollection.find({_id:ObjectId(req.params.id)})
-        .toArray((err, docs)=> {
-          res.send(docs[0])
-        })
-    })
-
-    app.post('/deleteProduct/:id', (req, res)=>{
-      productCollection.deleteOne({_id:ObjectId(req.params.id)})
-      .then(result =>{
-          res.send(result)
-      })
-    })
     
   });
 
